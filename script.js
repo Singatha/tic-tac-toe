@@ -6,6 +6,7 @@
         // div should not change size when being clicked
         // improve X and O styles
         // indicate the next player
+        // need to remove the alert
     // Logic
         // test the computer logic and make sure it works
         // try to make the computer unbeatable  
@@ -16,93 +17,114 @@
         // learn about web sockets and see how you can implement it here
         // try using electron.js to make it a desktop app 
 // Board Coordinates
-// [0][0] [0][1] [0][2]
-// [1][0] [1][1] [1][2]
-// [2][0] [2][1] [2][2] 
-// some logic
-// so first create a 2D array 9x9
-    // [[]]
-// when a player makes a move
-    // check if cell is empty
-        // if so add the player move onto 2D array
-    // then check if the cells match
-        // if so then, then game over ! and announce winner
-        //  Rows
-        //  [0][0] === "X" && [0][1] === "X" && [0][2] === "X"
-        //  [1][0] === "X" && [1][1] === "X" && [1][2] === "X"
-        //  [2][0] === "X" && [2][1] === "X" && [2][2] === "X"
-        //  Columns
-        //  [0][0] === "X" && [1][0] === "X" && [2][0] === "X"
-        //  [0][1] === "X" && [1][1] === "X" && [2][1] === "X"
-        //  [0][2] === "X" && [1][2] === "X" && [2][2] === "X"
-        //  Diagonals
-        //  [0][0] === "X" && [1][1] === "X" && [2][2] === "X"
-        //  [0][2] === "X" && [1][1] === "X" && [2][0] === "X"
-    // if no match and 2D is full then, then game over and a tie
+// [0] [1] [2]
+// [3] [4] [5]
+// [6] [7] [8] 
 
-// Improvised Enum (Javascript does not have enums apparently)
 const PLAYER_ROLE = {
    PLAYER_ROLE_X: "X",
    PLAYER_ROLE_O: "O"
 };
 Object.freeze(PLAYER_ROLE);
 
-let PLAYER_X_TURN = true;
-let PLAYER_O_TURN = false;
+let COMPUTER_ROLE = "";
+let PLAYER = "";
 
+let PLAYER_TURN = false;
+let COMPUTER_TURN = false;
 
-// const PLAYER_ROLES = [PLAYER_TURN.PLAYER_ROLE_X, PLAYER_TURN.PLAYER_ROLE_O];
-const BOARD = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+const PLAIN_BACKGROUND_IMG = "./images/Background.png";
+const X_CHARACTER_IMG = "./images/X-BlueCharacter.png";
+const O_CHARACTER_IMG = "./images/O-BlueCharacter.png";
 
-// function to reset the game
-function resetGame(){
-    // clear board
-    // BOARD = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-    // also clear the cell divs
-    PLAYER_X_TURN = false;
-    PLAYER_O_TURN = false; 
-    for (let i = 0; i < 3; i++){
-        for (let j = 0; j < 3; j++){
-            BOARD[i][j] = 0;
-            let index = i + "" + j;
-            document.getElementById(index).src = "./images/Background.png";
-        }
-    } 
+const NEW_BOARD = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+// event listener to for button x
+document.getElementById("button-x").addEventListener('click', () => {
+    PLAYER = PLAYER_ROLE.PLAYER_ROLE_X;
+    COMPUTER_ROLE = PLAYER_ROLE.PLAYER_ROLE_O;
+    document.getElementById("buttons").style.display = 'none'; 
+    startGame();
+});
+
+// event listener to for button o
+document.getElementById("button-o").addEventListener('click', () => {
+    PLAYER = PLAYER_ROLE.PLAYER_ROLE_O;
+    COMPUTER_ROLE = PLAYER_ROLE.PLAYER_ROLE_X;
+    document.getElementById("buttons").style.display = 'none';
+    startGame();
+});
+
+// event listener to reset the game
+document.getElementById("reset-button").addEventListener('click', () => {
+    COMPUTER_ROLE = "";
+    PLAYER = "";   
+    
+    PLAYER_TURN = false;
+    COMPUTER_TURN = false;
+
+    for (let i = 0; i < 9; i++){
+        NEW_BOARD[i] = 0;
+        document.getElementById(`${i}`).src = PLAIN_BACKGROUND_IMG;
+    }
+
+    document.getElementById("buttons").style.display = 'block';
+    displayMessage("Choose a Symbol");
+});
+
+// function to start the game
+const startGame = () => {
+    let starter = Math.floor(Math.random() * 2);
+    if (starter){
+        // player starts
+        PLAYER_TURN = true;
+        displayMessage(`Player ${PLAYER} turn`);
+    } else {
+        // computer starts
+        COMPUTER_TURN = true;
+        displayMessage(`Player ${COMPUTER_ROLE} turn`);
+        computerMove(PLAYER);
+        displayMessage(`Your turn`);
+    }
 }
 
 // function to check winner
-function checkWinner(player_role){
-    if ((BOARD[0][0] === player_role && BOARD[0][1] === player_role && BOARD[0][2] === player_role) ||
-        (BOARD[1][0] === player_role && BOARD[1][1] === player_role && BOARD[1][2] === player_role) ||
-        (BOARD[2][0] === player_role && BOARD[2][1] === player_role && BOARD[2][2] === player_role) ||
-             
-        (BOARD[0][0] === player_role && BOARD[1][0] === player_role && BOARD[2][0] === player_role) ||
-        (BOARD[0][1] === player_role && BOARD[1][1] === player_role && BOARD[2][1] === player_role) ||
-        (BOARD[0][2] === player_role && BOARD[1][2] === player_role && BOARD[2][2] === player_role) ||
-        
-        (BOARD[0][0] === player_role && BOARD[1][1] === player_role && BOARD[2][2] === player_role) ||
-        (BOARD[0][2] === player_role && BOARD[1][1] === player_role && BOARD[2][0] === player_role)){
-            return true;
+const checkWinner = (playerRole) => {
+    if ((NEW_BOARD[0] === playerRole && NEW_BOARD[1] === playerRole && NEW_BOARD[2] === playerRole) ||
+        (NEW_BOARD[3] === playerRole && NEW_BOARD[4] === playerRole && NEW_BOARD[5] === playerRole) ||
+        (NEW_BOARD[6] === playerRole && NEW_BOARD[7] === playerRole && NEW_BOARD[8] === playerRole) ||
+
+        (NEW_BOARD[0] === playerRole && NEW_BOARD[3] === playerRole && NEW_BOARD[6] === playerRole) ||
+        (NEW_BOARD[1] === playerRole && NEW_BOARD[4] === playerRole && NEW_BOARD[7] === playerRole) ||
+        (NEW_BOARD[2] === playerRole && NEW_BOARD[5] === playerRole && NEW_BOARD[8] === playerRole) ||
+
+        (NEW_BOARD[0] === playerRole && NEW_BOARD[4] === playerRole && NEW_BOARD[8] === playerRole) ||
+        (NEW_BOARD[2] === playerRole && NEW_BOARD[4] === playerRole && NEW_BOARD[6] === playerRole)){
+        return true;
     } else {
         return false;
     }
 }
 
 // function to set the move to the DOM
-function displayToDOM(x, y, player_role){
-    let index = x + "" + y;
-    if (player_role === "X"){
-        document.getElementById(index).src = "./images/X-BlueCharacter.png";
+const displayToDOM = (position, playerRole) => {
+    if (playerRole === PLAYER_ROLE.PLAYER_ROLE_X){
+        document.getElementById(`${position}`).src = X_CHARACTER_IMG;
     } else {
-        document.getElementById(index).src = "./images/O-BlueCharacter.png";
-    }   
+        document.getElementById(`${position}`).src = O_CHARACTER_IMG;
+    }
+}
+
+// function to display message to the DOM
+const displayMessage = (msg) => {
+    document.getElementById("game-status").innerHTML = msg;
 }
 
 // function to return the frequency of an item
-function frequency(arr, player_role){
+const frequency = (arr, playerRole) => {
     let counter = 0;
     for (let i = 0; i < 3; i++){
-        if (arr[i] === player_role){
+        if (arr[i] === playerRole){
             counter++;
         }
     }
@@ -110,244 +132,171 @@ function frequency(arr, player_role){
 }
 
 // function that plays against (computer player)
-function computerPlayer(player_type){
-    // [0][0] [0][1] [0][2]
-    // [1][0] [1][1] [1][2]
-    // [2][0] [2][1] [2][2]
-    // defense side or blocking
-        // so if player has two matches in a row or column or diagonal
-        // block the third match
-        // Row matches (use of some array methods here)
-        // X X 0 || 0 X X || X 0 X
-        // * * * || * * * || * * *
-        // * * * || * * * || * * *
-        
-        // * * * || * * * || * * *
-        // X X 0 || 0 X X || X 0 X
-        // * * * || * * * || * * *
-
-        // * * * || * * * || * * *
-        // * * * || * * * || * * *
-        // X X 0 || 0 X X || X 0 X
-
-        // ([0][0] === "X" && [0][1] === "X") || ([0][1] === "X" && [0][2] === "X") || ([0][0] === "X" && [0][2] === "X")
-            // check two matches in the row, if they exist, see if there is a null position, if so return the index
-        // ([1][0] === "X" && [1][1] === "X") || ([1][1] === "X" && [1][2] === "X") || ([1][0] === "X" && [1][2] === "X")
-            // check two matches in the row, if they exist, see if there is a null position, if so return the index
-        // ([2][0] === "X" && [2][1] === "X") || ([2][1] === "X" && [2][2] === "X") || ([2][0] === "X" && [2][2] === "X")
-            // check two matches in the row, if they exist, see if there is a null position, if so return the index
-
-        for (let i = 0; i < 3; i++){
-            if (frequency(BOARD[i], player_type) === 2 && BOARD[i].includes(0) && PLAYER_O_TURN === true){
-                let index = BOARD[i].indexOf(0);
-                BOARD[i][index] = player_type;
-                displayToDOM(i, index, player_type);
-                PLAYER_X_TURN = true;
-                PLAYER_O_TURN = false;
-            }
+const computerMove = (playerRole) => {
+    let rows = [];
+    for (let i = 0; i < 9; i += 3){
+        rows = NEW_BOARD.slice(i, i+3);
+        if (frequency(rows, playerRole) === 2 && rows.includes(0) && COMPUTER_TURN === true){
+            let index = rows.indexOf(0) + i;
+            NEW_BOARD[index] = COMPUTER_ROLE;
+            displayToDOM(index, COMPUTER_ROLE);
+            PLAYER_TURN = true;
+            COMPUTER_TURN = false;
         }
+    }
 
-        // Column matches (use of some array methods here)
-        // X * * || 0 * * || X * *
-        // X * * || X * * || 0 * *
-        // 0 * * || X * * || X * *
-        
-        // * * X || * 0 * || * X *
-        // * * X || * X * || * 0 *
-        // * * 0 || * X * || * X *
+    let column1 = [];
+    for (let j = 0; j < 9; j += 3){
+        column1.push(NEW_BOARD[j]);
+    }
 
-        // * * X || * * 0 || * * X
-        // * * X || * * X || * * 0
-        // * * 0 || * * X || * * X
+    if (frequency(column1, playerRole) === 2 && column1.includes(0) && COMPUTER_TURN === true){
+        let index1 = column1.indexOf(0) * 3;
+        NEW_BOARD[index1] = COMPUTER_ROLE;
+        displayToDOM(index1, COMPUTER_ROLE);
+        PLAYER_TURN = true;
+        COMPUTER_TURN = false;
+    }
+    
+    let column2 = [];
+    for (let k = 1; k < 9; k += 3){
+        column2.push(NEW_BOARD[k]);
+    }
 
-        // ([0][1] === "X" && [1][0] === "X") || ([1][0] === "X" && [2][0] === "X") || ([0][0] === "X" && [2][0] === "X")
-            // check two matches in the row, if they exist, see if there is a null position, if so return the index
-        // ([0][1] === "X" && [1][1] === "X") || ([1][1] === "X" && [2][1] === "X") || ([0][1] === "X" && [2][1] === "X")
-            // check two matches in the row, if they exist, see if there is a null position, if so return the index
-        // ([0][2] === "X" && [1][2] === "X") || ([1][2] === "X" && [2][2] === "X") || ([0][2] === "X" && [2][2] === "X")
-            // check two matches in the row, if they exist, see if there is a null position, if so return the index
+    if (frequency(column2, playerRole) === 2 && column2.includes(0) && COMPUTER_TURN === true){
+        let index2 = (column2.indexOf(0) * 3) + 1;
+        NEW_BOARD[index2] = COMPUTER_ROLE;
+        displayToDOM(index2, COMPUTER_ROLE);
+        PLAYER_TURN = true;
+        COMPUTER_TURN = false;
+    }
 
-        let columnArr1 = [];
-        for (let j = 0; j < 3; j++){
-            columnArr1.push(BOARD[j][0]);
+    let column3 = [];
+    for (let l = 2; l < 9; l += 3){
+        column3.push(NEW_BOARD[l]);
+    }
+
+    if (frequency(column3, playerRole) === 2 && column3.includes(0) && COMPUTER_TURN === true){
+        let index3 = (column3.indexOf(0) * 3) + 2;
+        NEW_BOARD[index3] = COMPUTER_ROLE;
+        displayToDOM(index3, COMPUTER_ROLE);
+        PLAYER_TURN = true;
+        COMPUTER_TURN = false;
+    }
+    
+    // block diagonal match
+    // 0 * * || X * * || X * * 0 1 2
+    // * X * || * 0 * || * X * 3 4 5
+    // * * X || * * X || * * 0 6 7 8
+
+    let diagonal1 = [];
+    for (let n = 0; n < 9; n += 4){
+        diagonal1.push(NEW_BOARD[n]);
+    }
+
+    if (frequency(diagonal1, playerRole) === 2 && diagonal1.includes(0) && COMPUTER_TURN === true){
+        let diagonalIndex1 = diagonal1.indexOf(0) * 4;
+        NEW_BOARD[diagonalIndex1] = COMPUTER_ROLE;
+        displayToDOM(diagonalIndex1, COMPUTER_ROLE);
+        PLAYER_TURN = true;
+        COMPUTER_TURN = false;
+    }
+
+    // * * 0 || * * X || * * X
+    // * X * || * 0 * || * X *
+    // X * * || X * * || 0 * *
+    
+    let diagonal2 = [];
+    for (let t = 2; t < 7; t += 2){
+        diagonal2.push(NEW_BOARD[t]);
+    }
+
+    if (frequency(diagonal2, playerRole) === 2 && diagonal2.includes(0) && COMPUTER_TURN === true){
+        let diagonalIndex2 = (diagonal2.indexOf(0) * 2) + 2;
+        NEW_BOARD[diagonalIndex2] = COMPUTER_ROLE;
+        displayToDOM(diagonalIndex2, COMPUTER_ROLE);
+        PLAYER_TURN = true;
+        COMPUTER_TURN = false;
+    }
+    
+    let tempRow = [];
+    for (let m = 0; m < 9; m += 3){
+        tempRow = NEW_BOARD.slice(m, m+3);
+        if ((tempRow.includes(COMPUTER_ROLE) || tempRow.includes(0)) && 
+            tempRow.includes(playerRole) !== true && COMPUTER_TURN === true){
+            let index4 = tempRow.indexOf(0) + m;
+            NEW_BOARD[index4] = COMPUTER_ROLE;
+            displayToDOM(index4, COMPUTER_ROLE);
+            PLAYER_TURN = true;
+            COMPUTER_TURN = false;
         }
+    }
 
-        if (frequency(columnArr1, player_type) === 2 && columnArr1.includes(0) && PLAYER_O_TURN === true){
-            let index1 = columnArr1.indexOf(0);
-            BOARD[index1][0] = player_type;
-            displayToDOM(index1, 0, player_type);
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;
-        }
-        
-        let columnArr2 = [];
-        for (let k = 0; k < 3; k++){
-            columnArr2.push(BOARD[k][1]);
-        }
+    // we need to do the same for columns
+    if ((column1.includes(COMPUTER_ROLE) || column1.includes(0)) && 
+        column1.includes(playerRole) !== true && COMPUTER_TURN === true){
+        let columnIndex1 = column1.indexOf(0) * 3;
+        NEW_BOARD[columnIndex1] = COMPUTER_ROLE;
+        displayToDOM(columnIndex1, COMPUTER_ROLE);
+        PLAYER_TURN = true;
+        COMPUTER_TURN = false;   
+    } else if ((column2.includes(COMPUTER_ROLE) || column2.includes(0)) && 
+        column2.includes(playerRole) !== true && COMPUTER_TURN === true){
+        let columnIndex2 = (column2.indexOf(0) * 3) + 1;
+        NEW_BOARD[columnIndex2] = COMPUTER_ROLE;
+        displayToDOM(columnIndex2, COMPUTER_ROLE);
+        PLAYER_TURN = true;
+        COMPUTER_TURN = false;
+    } else if ((column3.includes(COMPUTER_ROLE) || column3.includes(0)) && 
+        column3.includes(playerRole) !== true && COMPUTER_TURN === true){
+        let columnIndex3 = (column3.indexOf(0) * 3) + 2;
+        NEW_BOARD[columnIndex3] = COMPUTER_ROLE;
+        displayToDOM(columnIndex3, COMPUTER_ROLE);
+        PLAYER_TURN = true;
+        COMPUTER_TURN = false;
+    }
 
-        if (frequency(columnArr2, player_type) === 2 && columnArr2.includes(0) && PLAYER_O_TURN === true){
-            let index2 = columnArr2.indexOf(0);
-            BOARD[index2][1] = player_type;
-            displayToDOM(index2, 1, player_type);
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;
-        }
-
-        let columnArr3 = [];
-        for (let l = 0; l < 3; l++){
-            columnArr3.push(BOARD[l][2]);
-        }
-
-        if (frequency(columnArr3, player_type) === 2 && columnArr3.includes(0) && PLAYER_O_TURN === true){
-            let index3 = columnArr3.indexOf(0);
-            BOARD[index3][2] = player_type;
-            displayToDOM(index3, 2, player_type);
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;
-        }
-
-        // block diagonal match
-        // 0 * * || X * * || X * *
-        // * X * || * 0 * || * X *
-        // * * X || * * X || * * 0
-
-        let diagonalArr1 = [];
-        for (let n = 0; n < 3; n++){
-            diagonalArr1.push(BOARD[n][n]);
-        }
-
-        if (frequency(diagonalArr1, player_type) === 2 && diagonalArr1.includes(0) && PLAYER_O_TURN === true){
-            let ind1 = diagonalArr1.indexOf(0);
-            BOARD[ind1][ind1] = player_type;
-            displayToDOM(ind1, ind1, player_type);
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;
-        }
-
-        // * * 0 || * * X || * * X
-        // * X * || * 0 * || * X *
-        // X * * || X * * || 0 * *
-        let diagonalArr2 = [];
-        let last = 2; 
-        for (let t = 0; t < 3; t++){
-            diagonalArr2.push(BOARD[t][last]);
-            last--;
-        }
-
-        if (frequency(diagonalArr2, player_type) === 2 && diagonalArr2.includes(0) && PLAYER_O_TURN === true){
-            let ind2 = diagonalArr2.indexOf(0);
-            BOARD[ind2][2-ind1] = player_type;
-            displayToDOM(ind2, 2-ind1, player_type);
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;
-        }
-
-    // offesive side or attacking
-        // so try to match three cells in a row or column or diagonal
-        // so try to checkmate the player like here visually (of course will turn it into code)
-        // * * * || X * * || X X * || X X X
-        // * * * || * * * || * * * || * * *
-        // * * * || * * * || * * * || * * *
-        // if the row includes an X only and not only O and there's a 0
-            // then add a move
-            // so we do this check for all the rows
-        for (let m = 0; m < 3; m++){
-            if ((BOARD[m].includes(PLAYER_ROLE.PLAYER_ROLE_O) || BOARD[m].includes(0)) && BOARD[m].includes(PLAYER_ROLE.PLAYER_ROLE_X) !== true && PLAYER_O_TURN === true){
-                let index4 = BOARD[m].indexOf(0);
-                BOARD[m][index4] = player_type;
-                displayToDOM(m, index4, player_type);
-                PLAYER_X_TURN = true;
-                PLAYER_O_TURN = false;
-            }
-        }
-
-        // we need to do the same for columns
-        if ((columnArr1.includes(PLAYER_ROLE.PLAYER_ROLE_O) || columnArr1.includes(0)) && columnArr1.includes(PLAYER_ROLE.PLAYER_ROLE_X) !== true && PLAYER_O_TURN === true){
-            let indx1 = columnArr1.indexOf(0);
-            BOARD[indx1][0] = player_type;
-            displayToDOM(indx1, 0, player_type);
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;   
-        } else if ((columnArr2.includes(PLAYER_ROLE.PLAYER_ROLE_O) || columnArr2.includes(0)) && columnArr2.includes(PLAYER_ROLE.PLAYER_ROLE_X) !== true && PLAYER_O_TURN === true){
-            let indx2 = columnArr2.indexOf(0);
-            BOARD[indx2][1] = player_type;
-            displayToDOM(indx2, 1, player_type);
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;
-        } else if ((columnArr3.includes(PLAYER_ROLE.PLAYER_ROLE_O) || columnArr3.includes(0)) && columnArr3.includes(PLAYER_ROLE.PLAYER_ROLE_X) !== true && PLAYER_O_TURN === true){
-            let indx3 = columnArr3.indexOf(0);
-            BOARD[indx3][2] = player_type;
-            displayToDOM(indx3, 2, player_type);
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;
-        }
-
-        // we need to do the same for the diagonals 
-        if ((diagonalArr1.includes(PLAYER_ROLE.PLAYER_ROLE_O) || diagonalArr1.includes(0)) && diagonalArr1.includes(PLAYER_ROLE.PLAYER_ROLE_X) !== true && PLAYER_O_TURN === true){
-            let id1 = diagonalArr1.indexOf(0);
-            BOARD[id1][id1] = player_type;
-            displayToDOM(id1, id1, player_type);
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;   
-        } else if ((diagonalArr2.includes(PLAYER_ROLE.PLAYER_ROLE_O) || diagonalArr2.includes(0)) && diagonalArr2.includes(PLAYER_ROLE.PLAYER_ROLE_X) !== true && PLAYER_O_TURN === true){
-            let id2 = diagonalArr2.indexOf(0);
-            BOARD[id2][2-id2] = player_type;
-            displayToDOM(id2, 2-id2, player_type);
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;
-        } 
-
-        // What's next?
-            // Implement this attack pattern
-            // X * X
-            // * * *
-            // X * *
-            // or
-            // * * X
-            // * * *
-            // X * X
-            // or 
-            // X * *
-            // * * *
-            // X * X
-            // or 
-            // X * X
-            // * * *
-            // * * X
+    // we need to do the same for the diagonals 
+    if ((diagonal1.includes(COMPUTER_ROLE) || diagonal1.includes(0)) && 
+        diagonal1.includes(playerRole) !== true && COMPUTER_TURN === true){
+        let id1 = diagonal1.indexOf(0) * 4;
+        NEW_BOARD[id1] = COMPUTER_ROLE;
+        displayToDOM(id1, COMPUTER_ROLE);
+        PLAYER_TURN = true;
+        COMPUTER_TURN = false;   
+    } else if ((diagonal2.includes(COMPUTER_ROLE) || diagonal2.includes(0)) && 
+        diagonal2.includes(playerRole) !== true && COMPUTER_TURN === true){
+        let id2 = (diagonal2.indexOf(0) * 2) + 2;
+        NEW_BOARD[id2] = COMPUTER_ROLE;
+        displayToDOM(id2, COMPUTER_ROLE);
+        PLAYER_TURN = true;
+        COMPUTER_TURN = false;
+    }
 }
 
-// starter();
-
 // function adds the move into the array
-function handleMove(x, y){
-    if (PLAYER_X_TURN){
-        if (BOARD[x][y] === 0){
-            BOARD[x][y] = PLAYER_ROLE.PLAYER_ROLE_X;
-            displayToDOM(x, y, PLAYER_ROLE.PLAYER_ROLE_X);
-
-            if (checkWinner(PLAYER_ROLE.PLAYER_ROLE_X)){
-                alert("Game Over !\nPlayer " + PLAYER_ROLE.PLAYER_ROLE_X + " Wins");
+const handleMove = (position) => {
+    if (PLAYER_TURN){
+        if (NEW_BOARD[position] === 0){
+            NEW_BOARD[position] = PLAYER;
+            displayMessage(`Your turn`);
+            displayToDOM(position, PLAYER);
+            console.log(NEW_BOARD,"player");
+            if (checkWinner(PLAYER)){
+                displayMessage(`Player ${PLAYER} Wins`);
             } else {
-                PLAYER_X_TURN = false;
-                PLAYER_O_TURN = true;
-                computerPlayer(PLAYER_ROLE.PLAYER_ROLE_O);
-                if (checkWinner(PLAYER_ROLE.PLAYER_ROLE_O)){
-                    alert("Game Over !\nPlayer " + PLAYER_ROLE.PLAYER_ROLE_O + " Wins");
+                PLAYER_TURN = false;
+                COMPUTER_TURN = true;
+                displayMessage(`Player ${COMPUTER_ROLE} turn`);
+                computerMove(PLAYER);
+                if (checkWinner(COMPUTER_ROLE)){
+                    displayMessage(`Player ${COMPUTER_ROLE} Wins`);
                 } else {
-                    PLAYER_X_TURN = true;
-                    PLAYER_O_TURN = false;
+                    displayMessage(`Your turn`);
+                    PLAYER_TURN = true;
+                    COMPUTER_TURN = false;
                 }
             }
         }
-    } else {
-        //  computer's turn
-        computerPlayer(PLAYER_ROLE.PLAYER_ROLE_O);
-        if (checkWinner(PLAYER_ROLE.PLAYER_ROLE_O)){
-            alert("Game Over !\nPlayer " + PLAYER_ROLE.PLAYER_ROLE_O + " Wins");
-        } else {
-            PLAYER_X_TURN = true;
-            PLAYER_O_TURN = false;
-        }
-
-    }   
+    }
 }
