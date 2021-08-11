@@ -2,45 +2,54 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
     <title>Tic Tac Toe</title>
 </head>
 <body>
     <h1>Tic Tac Toe</h1>
-    <div class="board">
-        <div class="cell" onclick="handleMove(0,0)">
-            <img id="00" src="./images/Background.png" alt="">
+    <div id="bigger-9">
+        <div id="buttons">
+            <button id="button-x">X</button>
+            <button id="button-o">O</button>
         </div>
-        <div class="cell" onclick="handleMove(0,1)">
-            <img id="01" src="./images/Background.png" alt="">
+        <div>
+            <p id="game-status">Choose your Symbol</p>
         </div>
-        <div class="cell" onclick="handleMove(0,2)">
-            <img id="02" src="./images/Background.png" alt="">
+        <div class="board">
+            <div class="cell" onclick="handleMove(0)">
+                <img id="0" src="./images/Background.png" alt="">
+            </div>
+            <div class="cell" onclick="handleMove(1)">
+                <img id="1" src="./images/Background.png" alt="">
+            </div>
+            <div class="cell" onclick="handleMove(2)">
+                <img id="2" src="./images/Background.png" alt="">
+            </div>
+            
+            <div class="cell" onclick="handleMove(3)">
+                <img id="3" src="./images/Background.png" alt="">
+            </div>
+            <div class="cell" onclick="handleMove(4)">
+                <img id="4" src="./images/Background.png" alt="">
+            </div>
+            <div class="cell" onclick="handleMove(5)">
+                <img id="5" src="./images/Background.png" alt="">
+            </div>
+            
+            <div class="cell" onclick="handleMove(6)">
+                <img id="6" src="./images/Background.png" alt="">
+            </div>
+            <div class="cell" onclick="handleMove(7)">
+                <img id="7" src="./images/Background.png" alt="">
+            </div>
+            <div class="cell" onclick="handleMove(8)">
+                <img id="8" src="./images/Background.png" alt="">
+            </div>
         </div>
-        
-        <div class="cell" onclick="handleMove(1,0)">
-            <img id="10" src="./images/Background.png" alt="">
+        <div class="button">
+            <input id="reset-button" type="button" value="Reset">
         </div>
-        <div class="cell" onclick="handleMove(1,1)">
-            <img id="11" src="./images/Background.png" alt="">
-        </div>
-        <div class="cell" onclick="handleMove(1,2)">
-            <img id="12" src="./images/Background.png" alt="">
-        </div>
-        
-        <div class="cell" onclick="handleMove(2,0)">
-            <img id="20" src="./images/Background.png" alt="">
-        </div>
-        <div class="cell" onclick="handleMove(2,1)">
-            <img id="21" src="./images/Background.png" alt="">
-        </div>
-        <div class="cell" onclick="handleMove(2,2)">
-            <img id="22" src="./images/Background.png" alt="">
-        </div>
-    </div>
-    <div class="buttons">
-        <input type="button" value="Reset" onclick="resetGame()">
     </div>
     <script src="script.js"></script> 
 </body>
