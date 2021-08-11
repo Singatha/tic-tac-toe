@@ -2,23 +2,44 @@ body {
     background-color: teal;
 }
 
+#bigger-9 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 .board {
     display: grid;
     grid-template-columns: auto auto auto;
     grid-template-rows: auto auto auto;
     grid-gap: 10px;
-    width: 410px;
-    margin-left: auto;
-    margin-right: auto;
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-.buttons {
+.button {
     margin-top: 50px;
     width: 100px;
-    margin-left: auto;
-    margin-right: auto;
+}
+
+#buttons {
+    display: block;
+}
+
+button {
+    padding: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+p {
+    text-align: center;
+    font-size: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    color: white;
 }
 
 img {
@@ -40,7 +61,7 @@ input {
     border-radius: 2px;
     color: darkcyan;
     width: 100px;
-    font-size: 15px;
-    font-family: monospace;
+    font-size: 20px;
+    font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
 }
